@@ -3,17 +3,22 @@ const express = require('express')
 const router = express.Router();
 const axios = require('axios')
 const uuid = require('uuid');
+
 // import { v4 as uuidv4 } from 'uuid';
 
+let access_token;
 router.post('/', async(req, res)=> {
-    try {
+  
         const url = `https://api.spotify.com/v1/search?q=${req.body.query}&type=track&limit=50`;
         let results =await axios.get(url, {
           headers: {
-            Authorization: `Bearer BQC4FE_5fspn9_MhTx-jXOt37P7x8AzQRdoHsd1ZROIloSiuH9nqzyMFJc1t704G_PIsi6X-tchm_Luss-y5LsKN74Qdgw031NoG2rjYEc8QiHPpNA0`,
+            Authorization: `Bearer BQCQWvEnTvYdIgwY5iyeNpg7gxPuxzdicUu9PaQSYLokXikKpRsag4eiRo3XgROGEYbli4q3_Y9OeGZMZJr6qYw8kv2cEc-SB4KGu6rDs9LOoB1xHug`,
           },
-        });
-        let finished = results.data.tracks.items.map((element) =>{
+        }).catch((error) =>{
+          console.log(error.response.status)
+          res.json({});
+        })
+          let finished = results.data.tracks.items.map((element) =>{
           return(
             {
               id: uuid.v4(),  
@@ -25,11 +30,7 @@ router.post('/', async(req, res)=> {
             }
           )
         })        
-        // console.log(finished);
         res.json(finished);
-      } catch (error) {
-        console.log("failure");
-      }
 })
 
 

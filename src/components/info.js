@@ -1,9 +1,13 @@
-import React, { useState } from 'react';
+import React, { useContext} from 'react';
+import { MyContext } from '../myContext';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import 'bootstrap/dist/css/bootstrap.css';
 import { v4 as uuidv4 } from 'uuid';
 
+
 export default function Info({element,id,index}){
+
+
     return(
         <Draggable key={id} draggableId={id} index={index}>
           {(provided) => (
