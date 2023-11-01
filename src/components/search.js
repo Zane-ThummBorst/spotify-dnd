@@ -6,6 +6,7 @@ import axios from 'axios';
 import Info from './info'
 
 let url = 'http://localhost:1234/neet/back';
+let url2 = 'http://localhost:1234/neet/back/access'
 
 
 export default function Search(){

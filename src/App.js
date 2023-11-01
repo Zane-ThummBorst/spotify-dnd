@@ -10,6 +10,7 @@ import axios from 'axios';
 import Info from './components/info'
 import { MyContext } from "./myContext";
 let url = 'http://localhost:1234/neet/back';
+let url2 = 'http://localhost:1234/neet/back/access'
 
 
 const onDragEnd = (result, columns, setColumns, users, setUsers) => {
@@ -72,14 +73,10 @@ function App() {
   const [columns, setColumns] = useState({});
   let [users, setUsers] = useState([]);
 
-  const handleSubmit = (event) =>{
-    event.preventDefault()
-    axios.post(url, {
-        query: event.target.query.value
-    }).then((res)=>{
-      setUsers(res.data);
+  const handleAccess = () =>{
+    axios.post(url2).then((res)=>{
+      console.log("balls")
     })}
-
 
   const handleAddColumn = (event) =>{
     event.preventDefault()
@@ -95,6 +92,7 @@ function App() {
   }
     return(
       <div className='container'>
+        <button onClick={() => handleAccess()}>Hit me</button>
         <form onSubmit={handleAddColumn}>
           <input type='text' placeholder='Playlist Name' name='playlist_name'></input>
           <button type='submit'>Submit</button>
