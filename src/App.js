@@ -8,7 +8,9 @@ import Search from './components/search';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
 import Info from './components/info'
+import { MyContext } from "./myContext";
 let url = 'http://localhost:1234/neet/back';
+let url2 = 'http://localhost:1234/neet/back/access'
 
 
 const onDragEnd = (result, columns, setColumns, users, setUsers) => {
@@ -22,8 +24,6 @@ const onDragEnd = (result, columns, setColumns, users, setUsers) => {
       destItems.splice(destination.index, 0, sourceColumn[source.index]);
       let item = sourceColumn.splice(source.index, 1)[0];
       const newitem = {...item, id: uuidv4()}
-      console.log(item);
-      console.log(newitem);
       sourceColumn.splice(source.index, 0, newitem )
       setColumns({
         ...columns,
@@ -33,8 +33,6 @@ const onDragEnd = (result, columns, setColumns, users, setUsers) => {
         }
       });
       setUsers(sourceColumn);
-      //console.log(sourceColumn[source.index]);
-
   }
   else if (source.droppableId !== destination.droppableId) {
     const sourceColumn = columns[source.droppableId];
@@ -75,21 +73,15 @@ function App() {
   const [columns, setColumns] = useState({});
   let [users, setUsers] = useState([]);
 
-  const handleSubmit = (event) =>{
-    event.preventDefault()
-    axios.post(url, {
-        query: event.target.query.value
-    }).then((res)=>{
-      setUsers(res.data);
+  const handleAccess = () =>{
+    axios.post(url2).then((res)=>{
+      console.log("balls")
     })}
-
 
   const handleAddColumn = (event) =>{
     event.preventDefault()
     let name = event.target.playlist_name.value;
     let len = uuidv4();
-    // let obj = {}
-    // obj[len] = {items: []}
     setColumns({...columns, [len]: {playlist_name: name, items: []}})
   }
 
@@ -100,6 +92,7 @@ function App() {
   }
     return(
       <div className='container'>
+        <button onClick={() => handleAccess()}>Hit me</button>
         <form onSubmit={handleAddColumn}>
           <input type='text' placeholder='Playlist Name' name='playlist_name'></input>
           <button type='submit'>Submit</button>
@@ -112,28 +105,18 @@ function App() {
         <DragDropContext onDragEnd={(result) => onDragEnd(result, columns, setColumns, users, setUsers)}>
         <div className='row'>
           <div className='col-4'>
-          <form onSubmit={handleSubmit}>
-        <input type='text' name="query"></input>
-        <button type='submit'>submit</button>
-      </form>
-      <Droppable droppableId="Search" isDropDisabled={true}>
-        {(provided) => (
-        <ul className="border my-3 py-3 list-group" {...provided.droppableProps} ref={provided.innerRef}>
-        {users.map((element, index) =>{
-            return(
-            <Info element={element} id={element.id} index={index}></Info>
-            )
-        })}
-      </ul>
-      )}
-      </Droppable>
+          <MyContext.Provider value={{ users, setUsers }}>
+            <Search></Search>
+          </MyContext.Provider>
           </div>
           <div className='col-4 mt-3'>
           {Object.entries(columns).map(([id, column], index) =>{
             if(index % 2 == 0){
             return(
               <div>
-                <Playlist id={id} data={column}></Playlist>
+                <MyContext.Provider value={{columns,setColumns}}>
+                  <Playlist id={id} data={column}></Playlist>
+                </MyContext.Provider>
                 <button className='btn' onClick={() => deleteColumn(id)}>Delete</button>
               </div>
             )}
@@ -144,7 +127,9 @@ function App() {
             if(index%2 != 0){
             return(
               <div>
-                <Playlist id={id} data={column}></Playlist>
+                <MyContext.Provider value={{columns,setColumns}}>
+                  <Playlist id={id} data={column}></Playlist>
+                </MyContext.Provider>
                 <button className='btn' onClick={() => deleteColumn(id)}>Delete</button>
               </div>
             )}
