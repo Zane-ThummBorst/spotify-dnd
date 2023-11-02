@@ -13,8 +13,6 @@ export default function Playlist(props) {
     let destColumn = newColumn[id];
     let list = newColumn[id]['items'];
     list.splice(index,1);
-    console.log(list['items']);
-
     setColumns({
       ...columns,
       [id]: {

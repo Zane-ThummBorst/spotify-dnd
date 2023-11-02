@@ -9,6 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
 import Info from './components/info'
 import { MyContext } from "./myContext";
+import {Button, TextField, InputAdornment} from '@mui/material'
 let url = 'http://localhost:1234/neet/back';
 let url2 = 'http://localhost:1234/neet/back/access'
 
@@ -72,6 +73,7 @@ const onDragEnd = (result, columns, setColumns, users, setUsers) => {
 function App() {
   const [columns, setColumns] = useState({});
   let [users, setUsers] = useState([]);
+  let [playlistName, setPlaylistName] = useState('');
 
   const handleAccess = () =>{
     axios.post(url2).then((res)=>{
@@ -80,9 +82,8 @@ function App() {
 
   const handleAddColumn = (event) =>{
     event.preventDefault()
-    let name = event.target.playlist_name.value;
     let len = uuidv4();
-    setColumns({...columns, [len]: {playlist_name: name, items: []}})
+    setColumns({...columns, [len]: {playlist_name: playlistName, items: []}})
   }
 
   const deleteColumn = (id) => {
@@ -91,29 +92,31 @@ function App() {
     setColumns(newColumn);
   }
     return(
-      <div className='container'>
-        <button onClick={() => handleAccess()}>Hit me</button>
-        <form onSubmit={handleAddColumn}>
-          <input type='text' placeholder='Playlist Name' name='playlist_name'></input>
-          <button type='submit'>Submit</button>
-        </form>
-        <button className='btn' onClick={handleAddColumn}>Add Component</button>
-
-
-
+      <div className='container '>
 
         <DragDropContext onDragEnd={(result) => onDragEnd(result, columns, setColumns, users, setUsers)}>
         <div className='row'>
-          <div className='col-4'>
+          <div className='col-4 border rounded mt-3'>
+          <form onSubmit={handleAddColumn}>
+            <TextField
+            className='my-3'
+            id='set_playlist_name'
+            sx={{width: 300}}
+            label='Playlist Name'
+            onChange={(event) =>{setPlaylistName(event.target.value)}}
+            InputProps={{endAdornment: <Button className='mx-1' variant='outlined' type='submit'>Submit</Button> }}
+            />
+          </form>
           <MyContext.Provider value={{ users, setUsers }}>
             <Search></Search>
           </MyContext.Provider>
+          
           </div>
           <div className='col-4 mt-3'>
           {Object.entries(columns).map(([id, column], index) =>{
             if(index % 2 == 0){
             return(
-              <div>
+              <div className='border rounded'>
                 <MyContext.Provider value={{columns,setColumns}}>
                   <Playlist id={id} data={column}></Playlist>
                 </MyContext.Provider>
@@ -126,7 +129,7 @@ function App() {
           {Object.entries(columns).map(([id, column],index) =>{
             if(index%2 != 0){
             return(
-              <div>
+              <div className='border rounded'>
                 <MyContext.Provider value={{columns,setColumns}}>
                   <Playlist id={id} data={column}></Playlist>
                 </MyContext.Provider>
@@ -137,6 +140,7 @@ function App() {
           </div>
         </div>
         </DragDropContext>
+        <Button className='my-3' variant='outlined' onClick={() => handleAccess()}>Hit me</Button>
       </div>
     )
   }
