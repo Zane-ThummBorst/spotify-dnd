@@ -41,7 +41,12 @@ router.post('/', async(req, res)=> {
         genres.map((element) =>{
           queryString.push(element.label)
         })
-        const url = `https://api.spotify.com/v1/search?q=genre:"${queryString.join('"OR genre:"')}"${req.body.query}&type=track&limit=50`;
+        let propBuilder = ''; 
+        propBuilder += req.body.newTag ? `year:2023 ` : ''; 
+        if(queryString.length > 0)
+          propBuilder += ` genre:"${queryString.join('"OR genre:"')}" `;
+        propBuilder += req.body.query === undefined ? "" : req.body.query 
+        const url = `https://api.spotify.com/v1/search?q=${propBuilder}&type=track&limit=50`;
         let data = JSON.parse(fs.readFileSync(file));
         let results =await axios.get(url, {
           headers: {

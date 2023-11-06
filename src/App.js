@@ -14,7 +14,7 @@ let url = 'http://localhost:1234/neet/back';
 let url2 = 'http://localhost:1234/neet/back/access'
 
 
-const onDragEnd = (result, columns, setColumns, users, setUsers) => {
+const onDragEnd = (result, columns, setColumns, users, setUsers, setDragged) => {
   if (!result.destination) return;
   const { source, destination } = result;
 
@@ -65,6 +65,7 @@ const onDragEnd = (result, columns, setColumns, users, setUsers) => {
          items: copiedItems
       }
     });
+    setDragged('w-100');
   }
 };
 
@@ -74,6 +75,7 @@ function App() {
   const [columns, setColumns] = useState({});
   let [users, setUsers] = useState([]);
   let [playlistName, setPlaylistName] = useState('');
+  const [dragged, setDragged] = useState('w-100');
 
   const handleAccess = () =>{
     axios.post(url2).then((res)=>{
@@ -94,7 +96,9 @@ function App() {
     return(
       <div className='container '>
 
-        <DragDropContext onDragEnd={(result) => onDragEnd(result, columns, setColumns, users, setUsers)}>
+        <DragDropContext
+        onDragStart={() =>{setDragged('')}}
+        onDragEnd={(result) => onDragEnd(result, columns, setColumns, users, setUsers, setDragged)}>
         <div className='row'>
           <div className='col-4 border rounded mt-3'>
           <form onSubmit={handleAddColumn}>
@@ -116,11 +120,11 @@ function App() {
           {Object.entries(columns).map(([id, column], index) =>{
             if(index % 2 == 0){
             return(
-              <div className='border rounded'>
-                <MyContext.Provider value={{columns,setColumns}}>
+              <div className='border rounded mt-3'>
+                <MyContext.Provider value={{columns,setColumns,dragged}}>
                   <Playlist id={id} data={column}></Playlist>
                 </MyContext.Provider>
-                <button className='btn' onClick={() => deleteColumn(id)}>Delete</button>
+                <Button className = 'my-2 mx-2' variant='outlined' onClick={() => deleteColumn(id)}>Delete</Button>
               </div>
             )}
           })}
@@ -129,11 +133,11 @@ function App() {
           {Object.entries(columns).map(([id, column],index) =>{
             if(index%2 != 0){
             return(
-              <div className='border rounded'>
-                <MyContext.Provider value={{columns,setColumns}}>
+              <div className='border rounded mt-3'>
+                <MyContext.Provider value={{columns,setColumns,dragged}}>
                   <Playlist id={id} data={column}></Playlist>
                 </MyContext.Provider>
-                <button className='btn' onClick={() => deleteColumn(id)}>Delete</button>
+                <Button className = 'my-2 mx-2' variant='outlined' onClick={() => deleteColumn(id)}>Delete</Button>
               </div>
             )}
           })}
