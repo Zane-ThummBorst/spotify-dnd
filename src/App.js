@@ -114,7 +114,6 @@ function App() {
           <MyContext.Provider value={{ users, setUsers }}>
             <Search></Search>
           </MyContext.Provider>
-          
           </div>
           <div className='col-4 mt-3'>
           {Object.entries(columns).map(([id, column], index) =>{
@@ -144,7 +143,6 @@ function App() {
           </div>
         </div>
         </DragDropContext>
-        <Button className='my-3' variant='outlined' onClick={() => handleAccess()}>Hit me</Button>
       </div>
     )
   }

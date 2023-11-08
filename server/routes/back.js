@@ -46,7 +46,7 @@ router.post('/', async(req, res)=> {
         if(queryString.length > 0)
           propBuilder += ` genre:"${queryString.join('"OR genre:"')}" `;
         propBuilder += req.body.query === undefined ? "" : req.body.query 
-        const url = `https://api.spotify.com/v1/search?q=${propBuilder}&type=track&limit=50`;
+        const url = `https://api.spotify.com/v1/search?q=${propBuilder}&type=track&limit=50&offset=${req.body.offset}`;
         let data = JSON.parse(fs.readFileSync(file));
         let results =await axios.get(url, {
           headers: {

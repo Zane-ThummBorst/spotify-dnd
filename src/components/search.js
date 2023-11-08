@@ -7,6 +7,7 @@ import Info from './info'
 import TextField from '@mui/material/TextField';
 import {Button, Autocomplete, InputAdornment, Switch, FormControlLabel} from '@mui/material'
 
+
 let url = 'http://localhost:1234/neet/back';
 let url2 = 'http://localhost:1234/neet/back/access'
 
@@ -18,10 +19,13 @@ export default function Search(){
   const [submission,setSubmission] = useState('a')
   const [newSongs, setNewSongs] = useState(false)
   const [timeOut, setTimeOut] = useState(0)
+  const [offset, setOffset] = useState(0)
+
 
   const handleToggle = (event) =>{
     setNewSongs(event.target.checked)
   }
+
 
   useEffect(() => {
     axios.get('http://localhost:1234/neet/back/genreList').then((res) =>{
@@ -32,45 +36,67 @@ export default function Search(){
       setGenres(list)
   })},[]);
 
+
+
   useEffect(() =>{
     clearTimeout(timeOut);
     const newTimeout = setTimeout(() => {
-      handleSubmit(null);
+      setOffset(0);
+      handleSubmit(0);
     }, 500);
     setTimeOut(newTimeout);
   }, [submission, newSongs])
 
-    const handleSubmit = (event) =>{
+
+    const handleSubmit = (offset) =>{
       console.log(submission);
       let query = submission
       if(query == ""){
         query = "s"
       }
-
-      if(event != null)
-        event.preventDefault()
+      const off = offset;
       axios.post(url, {
           query: query,
           genres: genre,
-          newTag: newSongs
+          newTag: newSongs,
+          offset: off
       }).then((res)=>{
-        setUsers(res.data);
+        if(offset > 0){
+          const merged = [...users, ...res.data];
+          setUsers(merged);
+        }else{
+          setUsers(res.data);
+        }
       })}
 
-      // const handleChange = (event) =>{
-      //   const query = event.target.value
-      //   setSubmission(event.target.value)
-      //   clearTimeout(timeOut);
+      // const handleScroll = (event) =>{
+      //   const bottom = (event.target.clientHeight ===  Math.ceil(event.target.scrollHeight - event.target.scrollTop)) || (event.target.clientHeight ===  Math.floor(event.target.scrollHeight - event.target.scrollTop));
+      //   if(!bottom){
+      //     console.log(event.target.clientHeight)
+      //     console.log("============")
+      //     console.log(event.target.scrollHeight - event.target.scrollTop)
+      //   }else{
+      //     let query = submission
+      //     if(query == ""){
+      //       query = "s"
+      //     }
+      //     let off = offset;
+      //     setOffset(off + 50);
+      //     axios.post(url, {
+      //       query: query,
+      //       genres: genre,
+      //       newTag: newSongs,
+      //       offset: off+50
+      //   }).then((res)=>{
+      //     console.log("multiple????")
+      //     const merged = [...users, ...res.data];
+      //     setUsers(merged);
+      //   })}
+      // }
 
-      //   const newTimeout = setTimeout(() => {
-      //     handleSubmit(null,query);
-      //   }, 500);
-
-      //   setTimeOut(newTimeout);
-      // }  
     return (
      <div>
-      <form onSubmit={(event) => {handleSubmit(event)}}>
+      <form>
         <div className='d-flex' >
           <TextField
           className='my-3'
@@ -102,7 +128,7 @@ export default function Search(){
           label='New Songs'
         />
 
-        <Button variant='outlined' type='submit'>submit</Button>
+        <Button onClick={() => {setOffset(0)}} variant='outlined'>submit</Button>
       </form>
       <Droppable droppableId="Search" isDropDisabled={true}>
         {(provided) => (
@@ -112,6 +138,10 @@ export default function Search(){
             <Info element={element} id={element.id} playlist_id="Search" index={index}></Info>
             )
         })}
+        
+        <li><Button onClick={() => {handleSubmit(offset+50)
+           setOffset(offset+ 50); }}
+            variant='outlined'>Load More</Button></li>
       </ul>
       )}
       </Droppable>
