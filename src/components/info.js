@@ -10,7 +10,6 @@ export default function Info({element,id,playlist_id,index}){
     const { columns, setColumns, dragged } = useContext(MyContext);
     const button = playlist_id != "Search" ? <Button className='align-right' variant='outlined' onClick={() => deleteSong(playlist_id, index)}>X</Button> : '' 
     const deleteSong = (id, index) =>{
-        console.log(id);
         let newColumn = {...columns};
         let destColumn = newColumn[id];
         let list = newColumn[id]['items'];

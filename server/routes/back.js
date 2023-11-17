@@ -90,4 +90,66 @@ router.get('/genreList', async(req, res) =>{
   res.json({"genres":["acoustic","afrobeat","alt-rock","alternative","ambient","anime","black-metal","bluegrass","blues","bossanova","brazil","breakbeat","british","cantopop","chicago-house","children","chill","classical","club","comedy","country","dance","dancehall","death-metal","deep-house","detroit-techno","disco","disney","drum-and-bass","dub","dubstep","edm","electro","electronic","emo","folk","forro","french","funk","garage","german","gospel","goth","grindcore","groove","grunge","guitar","happy","hard-rock","hardcore","hardstyle","heavy-metal","hip-hop","holidays","honky-tonk","house","idm","indian","indie","indie-pop","industrial","iranian","j-dance","j-idol","j-pop","j-rock","jazz","k-pop","kids","latin","latino","malay","mandopop","metal","metal-misc","metalcore","minimal-techno","movies","mpb","new-age","new-release","opera","pagode","party","philippines-opm","piano","pop","pop-film","post-dubstep","power-pop","progressive-house","psych-rock","punk","punk-rock","r-n-b","rainy-day","reggae","reggaeton","road-trip","rock","rock-n-roll","rockabilly","romance","sad","salsa","samba","sertanejo","show-tunes","singer-songwriter","ska","sleep","songwriter","soul","soundtracks","spanish","study","summer","swedish","synth-pop","tango","techno","trance","trip-hop","turkish","work-out","world-music"]})
 })
 
+
+
+router.get('/userInfo', async(req,res) =>{
+  const url = "https://api.spotify.com/v1/me";
+  let data = JSON.parse(fs.readFileSync(file));
+  let results =await axios.get(url, {
+    headers: {
+      Authorization: `Bearer BQCUvBcgNcPVZ9DwOnmn9h3D43E1ENM_8iaiV0aPRwPbrRQD2G-euINqfqzNemFOXGxF8dmavn8whmRkX51_JawgozHziLzYJ2LRRBK8aI04sgVcIwuJQsUjOtaSoOuJiyq4VQAvLxu__ZxT0YdqK28wk4j8aF9AbHEgT9-VVTFthfgXHiiWNN4`,
+    },
+  }).then(response =>{
+    res.json(response.data.id);
+    console.log(response)
+  }).catch((error) =>{
+    console.log(error)
+  })
+})
+
+
+/**
+ * TODO:
+ *  grab user id programically
+ *  grab bearer token programically
+ */
+router.get('/userPlaylist', async(req,res) =>{
+  // const user_id = 'zanethummborst'
+  const url = `https://api.spotify.com/v1/me/playlists`
+  let results =await axios.get(url, {
+    headers: {
+      Authorization: `Bearer BQCUvBcgNcPVZ9DwOnmn9h3D43E1ENM_8iaiV0aPRwPbrRQD2G-euINqfqzNemFOXGxF8dmavn8whmRkX51_JawgozHziLzYJ2LRRBK8aI04sgVcIwuJQsUjOtaSoOuJiyq4VQAvLxu__ZxT0YdqK28wk4j8aF9AbHEgT9-VVTFthfgXHiiWNN4`,
+    },
+    }).then(response =>{
+      console.log(response.data.items)
+      res.json(response.data.items)
+    }) 
+})
+
+router.post('/createPlaylist', async(req,res) =>{
+    const playlist_name = req.body.playlist;
+    console.log(playlist_name)
+    const user_id = req.body.user_id;
+    const access_token = req.body.access_token;
+
+    const playlistDetails = {
+      name: playlist_name,
+      description: 'lemon scented',
+      public: true, // Set to false for a private playlist
+    };
+
+    const url = `https://api.spotify.com/v1/users/zanethummborst/playlists`
+    let results =await axios.post(url, playlistDetails, {
+      headers: {
+        Authorization: `Bearer ${access_token}`,
+        'Content-Type': 'application/json'
+      }
+    }).then((response) =>{
+      console.log("playlist successfuly created")
+      console.log(response)
+    }).catch((error) =>{
+      console.log(error.response.data)
+    })
+  })
+
 module.exports = router

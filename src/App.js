@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.css';
@@ -9,7 +9,9 @@ import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
 import Info from './components/info'
 import { MyContext } from "./myContext";
-import {Button, TextField, InputAdornment} from '@mui/material'
+import {Button, TextField, InputAdornment, Container} from '@mui/material'
+import Grid from '@mui/material/Unstable_Grid2';
+import Auth from './components/auth';
 let url = 'http://localhost:1234/neet/back';
 let url2 = 'http://localhost:1234/neet/back/access'
 
@@ -76,7 +78,16 @@ function App() {
   let [users, setUsers] = useState([]);
   let [playlistName, setPlaylistName] = useState('');
   const [dragged, setDragged] = useState('w-100');
+  const [code, setCode] = useState(null);
+  const [userId, setUserId] = useState(null);
 
+  useEffect(() =>{
+    const args = new URLSearchParams(window.location.search);
+    const url_code = args.get('code');
+    
+    setCode(url_code)
+  }, [])
+  
   const handleAccess = () =>{
     axios.post(url2).then((res)=>{
       console.log("balls")
@@ -93,55 +104,75 @@ function App() {
     delete newColumn[id];
     setColumns(newColumn);
   }
+
+  const publishPlaylist = (playlist_name) =>{
+    const play = playlist_name
+    axios.post("http://localhost:1234/neet/back/createPlaylist",{
+      user_id: localStorage.getItem('user_id'),
+      access_token: localStorage.getItem('access_token'),
+      playlist: play.playlist_name
+    }).catch((error) =>{
+      console.log(error)
+    })
+  }
     return(
       <div className='container '>
-
+          <MyContext.Provider value={{code, setCode, userId, setUserId}}>
+            <Auth></Auth>
+          </MyContext.Provider>
         <DragDropContext
         onDragStart={() =>{setDragged('')}}
         onDragEnd={(result) => onDragEnd(result, columns, setColumns, users, setUsers, setDragged)}>
-        <div className='row'>
-          <div className='col-4 border rounded mt-3'>
-          <form onSubmit={handleAddColumn}>
-            <TextField
-            className='my-3'
-            id='set_playlist_name'
-            sx={{width: 300}}
-            label='Playlist Name'
-            onChange={(event) =>{setPlaylistName(event.target.value)}}
-            InputProps={{endAdornment: <Button className='mx-1' variant='outlined' type='submit'>Submit</Button> }}
-            />
-          </form>
-          <MyContext.Provider value={{ users, setUsers }}>
-            <Search></Search>
-          </MyContext.Provider>
-          </div>
-          <div className='col-4 mt-3'>
+        <Grid className='mt-3' container spacing={6}>
+          <Grid item
+           xs={4}
+           style={{ position: 'sticky', top: 0, background: 'white', maxHeight: '720px' }}
+           className='border rounded'
+           >
+            <form onSubmit={handleAddColumn}>
+              <TextField
+              className='my-3'
+              id='set_playlist_name'
+              sx={{width: 300}}
+              label='Playlist Name'
+              onChange={(event) =>{setPlaylistName(event.target.value)}}
+              InputProps={{endAdornment: <Button className='mx-1' variant='outlined' type='submit'>Submit</Button> }}
+              />
+            </form>
+            <MyContext.Provider value={{ users, setUsers }}>
+              <Search></Search>
+            </MyContext.Provider>
+            <Button variant='outlined' onClick={() =>{handleAccess()}}>Hit meh</Button>
+          </Grid>
+          <Grid item xs={4}>
           {Object.entries(columns).map(([id, column], index) =>{
             if(index % 2 == 0){
             return(
-              <div className='border rounded mt-3'>
+              <div className='mb-3 border rounded'>
                 <MyContext.Provider value={{columns,setColumns,dragged}}>
                   <Playlist id={id} data={column}></Playlist>
                 </MyContext.Provider>
                 <Button className = 'my-2 mx-2' variant='outlined' onClick={() => deleteColumn(id)}>Delete</Button>
+                <Button className = 'my-2 mx-2' variant='outlined' onClick={() => publishPlaylist(column) }>Publish</Button>
               </div>
             )}
           })}
-          </div>
-          <div className='col-4 mt-3'>
+          </Grid>
+          <Grid item xs={4}>
           {Object.entries(columns).map(([id, column],index) =>{
             if(index%2 != 0){
             return(
-              <div className='border rounded mt-3'>
+              <div className='mb-3 border rounded'>
                 <MyContext.Provider value={{columns,setColumns,dragged}}>
                   <Playlist id={id} data={column}></Playlist>
                 </MyContext.Provider>
                 <Button className = 'my-2 mx-2' variant='outlined' onClick={() => deleteColumn(id)}>Delete</Button>
+                <Button className = 'my-2 mx-2' variant='outlined' onClick={() => publishPlaylist(column) }>Publish</Button>
               </div>
             )}
           })}
-          </div>
-        </div>
+          </Grid>
+        </Grid>
         </DragDropContext>
       </div>
     )

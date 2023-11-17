@@ -49,7 +49,6 @@ export default function Search(){
 
 
     const handleSubmit = (offset) =>{
-      console.log(submission);
       let query = submission
       if(query == ""){
         query = "s"
@@ -69,35 +68,11 @@ export default function Search(){
         }
       })}
 
-      // const handleScroll = (event) =>{
-      //   const bottom = (event.target.clientHeight ===  Math.ceil(event.target.scrollHeight - event.target.scrollTop)) || (event.target.clientHeight ===  Math.floor(event.target.scrollHeight - event.target.scrollTop));
-      //   if(!bottom){
-      //     console.log(event.target.clientHeight)
-      //     console.log("============")
-      //     console.log(event.target.scrollHeight - event.target.scrollTop)
-      //   }else{
-      //     let query = submission
-      //     if(query == ""){
-      //       query = "s"
-      //     }
-      //     let off = offset;
-      //     setOffset(off + 50);
-      //     axios.post(url, {
-      //       query: query,
-      //       genres: genre,
-      //       newTag: newSongs,
-      //       offset: off+50
-      //   }).then((res)=>{
-      //     console.log("multiple????")
-      //     const merged = [...users, ...res.data];
-      //     setUsers(merged);
-      //   })}
-      // }
 
     return (
      <div>
       <form>
-        <div className='d-flex' >
+        <div className='d-flex'>
           <TextField
           className='my-3'
           id='main-search'
@@ -128,7 +103,11 @@ export default function Search(){
           label='New Songs'
         />
 
-        <Button onClick={() => {setOffset(0)}} variant='outlined'>submit</Button>
+        <Button 
+        onClick={() => {
+          setOffset(0)
+          handleSubmit(0)}}
+        variant='outlined'>submit</Button>
       </form>
       <Droppable droppableId="Search" isDropDisabled={true}>
         {(provided) => (
@@ -141,7 +120,8 @@ export default function Search(){
         
         <li><Button onClick={() => {handleSubmit(offset+50)
            setOffset(offset+ 50); }}
-            variant='outlined'>Load More</Button></li>
+            variant='outlined'
+            className='mt-3 mx-3'>Load More</Button></li>
       </ul>
       )}
       </Droppable>
