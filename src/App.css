@@ -53,8 +53,26 @@
   margin-right: .5em;
 }
 
+
+/* .draggable {
+  top: auto !important;
+  left: auto !important;
+} */
+
 .characters-thumb img {
   display: block;
   width: 100%;
   height: auto;
+}
+
+.stuff {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+.stuff span{
+  display:block;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }

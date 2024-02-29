@@ -1,11 +1,13 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { MyContext } from '../myContext';
-import {  Droppable } from 'react-beautiful-dnd';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import 'bootstrap/dist/css/bootstrap.css';
 import axios from 'axios';
 import Info from './info'
+import {Box} from '@mui/material'
 import TextField from '@mui/material/TextField';
 import {Button, Autocomplete, InputAdornment, Switch, FormControlLabel} from '@mui/material'
+import { FixedSizeList, areEqual } from 'react-window';
 
 
 let url = 'http://localhost:1234/neet/back';
@@ -13,7 +15,7 @@ let url2 = 'http://localhost:1234/neet/back/access'
 
 
 export default function Search(){
-  const { users, setUsers } = useContext(MyContext);
+  const { users, setUsers, is_expired, getRefreshToken } = useContext(MyContext);
   const [genres, setGenres] = useState([]);
   const [genre, setGenre] = useState([]);
   const [submission,setSubmission] = useState('a')
@@ -21,6 +23,44 @@ export default function Search(){
   const [timeOut, setTimeOut] = useState(0)
   const [offset, setOffset] = useState(0)
 
+  // try to change up?? Snagged from code sandbox example
+  function getStyle({ provided, style, isDragging }) {
+    const combined = {
+      ...style,
+      ...provided.draggableProps.style,
+    };
+  
+    const marginBottom = 8;
+    const withSpacing = {
+      ...combined,
+      height: isDragging ? combined.height : combined.height - marginBottom,
+      marginBottom,
+    };
+    return withSpacing;
+  }
+  
+  //rename function to something more appropriate
+  function Next({ provided, item, style, isDragging, playlist_id, index }) {
+    return (
+      <div
+        {...provided.draggableProps}
+        {...provided.dragHandleProps}
+        ref={provided.innerRef}
+        style={getStyle({ provided, style, isDragging })}
+      >
+          <Info isDragging={isDragging} element={item} id={item.id} playlist_id='Search' index={index}/>
+      </div>
+    );
+  }
+    //figure out how react memo is working???
+    const Row = React.memo(({ index, style, data, playlist_id }) => {
+      const item = data[index];
+      return (
+        <Draggable draggableId={item.id} index={index} key={"same"}>
+          {(provided) => <Next provided={provided} item={item} style={style} playlist_id='Searchy' index={index} />}
+        </Draggable>
+      );
+   }, areEqual);
 
   const handleToggle = (event) =>{
     setNewSongs(event.target.checked)
@@ -49,6 +89,7 @@ export default function Search(){
 
 
     const handleSubmit = (offset) =>{
+      console.log(is_expired())
       let query = submission
       if(query == ""){
         query = "s"
@@ -58,7 +99,8 @@ export default function Search(){
           query: query,
           genres: genre,
           newTag: newSongs,
-          offset: off
+          offset: off,
+          access_token: localStorage.getItem('access_token')
       }).then((res)=>{
         if(offset > 0){
           const merged = [...users, ...res.data];
@@ -72,17 +114,16 @@ export default function Search(){
     return (
      <div>
       <form>
-        <div className='d-flex'>
+        <Box display='flex'>
           <TextField
-          className='my-3'
           id='main-search'
-          sx={{width: 300}}
+          sx={{width: 300, my:2}}
           label='Song Search'
           onChange={(event) =>{
             setSubmission(event.target.value)
           }}
           />
-          <Autocomplete className='my-3'
+          <Autocomplete
             multiple
             disablePortal
             limitTags={1}
@@ -91,13 +132,13 @@ export default function Search(){
             onChange={(event, newValue) =>{
               setGenre(newValue);
             }}
-            sx={{ width: 400}}
+            sx={{ width: 400, my:2}}
             renderInput={(params) => <TextField {...params} label="Genre" />}
             name="genres"
           />
-        </div>
+        </Box>
         <FormControlLabel
-          className='me-5'
+          sx={{mr:5}}
           control={<Switch onChange={(event) =>{
             handleToggle(event)}}/>}
           label='New Songs'
@@ -109,20 +150,32 @@ export default function Search(){
           handleSubmit(0)}}
         variant='outlined'>submit</Button>
       </form>
-      <Droppable droppableId="Search" isDropDisabled={true}>
+      <Droppable droppableId="Search" isDropDisabled={true} mode = 'virtual' renderClone={
+        (provided, snapshot, rubric) => (
+          <Next
+            provided={provided}
+            isDragging={snapshot.isDragging}
+            item={users[rubric.source.index]}
+            playlist_id='Search'
+          />
+      )}>
         {(provided) => (
-        <ul style={{maxHeight: '400px', overflow: 'auto'}} className="border my-3 py-3 list-group" {...provided.droppableProps} ref={provided.innerRef}>
-        {users.map((element, index) =>{
-            return(
-            <Info element={element} id={element.id} playlist_id="Search" index={index}></Info>
-            )
-        })}
-        
-        <li><Button onClick={() => {handleSubmit(offset+50)
-           setOffset(offset+ 50); }}
-            variant='outlined'
-            className='mt-3 mx-3'>Load More</Button></li>
-      </ul>
+          // bootstrap TODO
+          <Box sx={{my:2, py:2, border:1, borderRadius: '2%'}}>
+          <FixedSizeList
+            height={400}
+            itemCount={users.length}
+            itemSize={80}
+            itemData={users}
+            outerRef={provided.innerRef}
+            innerElementType="ul"
+            playlist_id = 'Search'
+            style={{ maxHeight: '400px', overflow: 'auto' }}
+            {...provided.droppableProps}
+            >
+            {Row}
+          </FixedSizeList>
+          </Box>
       )}
       </Droppable>
      </div>

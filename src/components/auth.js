@@ -35,7 +35,7 @@ const authorize = async() =>{
     const codeVerifier  = generateRandomString(64);
     const hashed = await sha256(codeVerifier);
     const codeChallenge = base64encode(hashed);
-    const scope = 'playlist-modify-public';
+    const scope = 'playlist-modify-public playlist-modify-private user-read-email';
     window.localStorage.setItem('code_verifier', codeVerifier);
     window.localStorage.setItem('code_verifier', codeVerifier);
 
@@ -62,7 +62,7 @@ export default function Auth(){
     //There is room in this useEffect to prevent making calls (don't need to make post everytime since )
     useEffect( () =>{
         const fetchToken = async () =>{
-            if(code != null && localStorage.getItem('access_code') == undefined){
+            if(code != null){
                 let codeVerifier = localStorage.getItem('code_verifier');
         
                 const payload = {
@@ -85,23 +85,27 @@ export default function Auth(){
                 const response =await body.json();
                 if(response.access_token != undefined){
                     localStorage.setItem('access_token', response.access_token);
+                    localStorage.setItem('refresh_token', response.refresh_token);
+                    let curDate = new Date();
+                    console.log(curDate)
+                    localStorage.setItem('expire_time', curDate.setSeconds(curDate.getSeconds() + response.expires_in))
                 }
-            }
-            if(localStorage.getItem('user_id') == null){
-                const id = await axios.get('http://localhost:1234/neet/back/userInfo').then((response) =>{
+                const id = await axios.post('http://localhost:1234/neet/back/userInfo',
+                {access_token: localStorage.getItem('access_token')}).then((response) =>{
+                    console.log('balls');
                     localStorage.setItem('user_id', response.data)
                 }).catch((error) =>{
                     console.log("Somethings amuck");
                 })
             }
+                //triggering twice, dang
+            
 
         }
         fetchToken();
     }, [code])
 
     return(
-        <div>
-            <Button className='mt-3' variant='outlined' onClick={() =>{authorize()}} >Login</Button>
-        </div>
+            <Button sx={{mt: 2}} variant='outlined' onClick={() =>{authorize()}} >Login</Button>
     )
 }
