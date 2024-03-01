@@ -2,12 +2,9 @@ import React, { useContext, useState, useEffect } from 'react';
 import { MyContext} from '../myContext';
 import 'bootstrap/dist/css/bootstrap.css';
 import axios from 'axios';
-import {Button, Autocomplete, InputAdornment, Switch, FormControlLabel} from '@mui/material'
-const CLIENT_ID = 'afb7072142534f63a2142805b5417358';
-const REDIRECT_URI = 'http://localhost:3000';
-const SCOPE = 'user-read-private user-read-email';
-const AUTH_ENDPOINT = 'https://accounts.spotify.com/authorize';
-const RESPONSE_TYPE = 'token'
+import {Button} from '@mui/material'
+const CLIENT_ID = process.env.REACT_APP_CLIENT_ID;
+const REDIRECT_URI = process.env.REACT_APP_REDIRECT_URI;
 const AUTHURL = new URL("https://accounts.spotify.com/authorize")
 
 

@@ -11,7 +11,6 @@ import { FixedSizeList, areEqual } from 'react-window';
 
 
 let url = 'http://localhost:1234/neet/back';
-let url2 = 'http://localhost:1234/neet/back/access'
 
 
 export default function Search(){

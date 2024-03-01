@@ -10,7 +10,7 @@ import {Button, Container, Box, Pagination, TextField} from '@mui/material'
 import Grid from '@mui/material/Unstable_Grid2';
 import Auth from './components/auth';
 import SearchColumn from './components/SearchColumn'
-const clientId = 'afb7072142534f63a2142805b5417358';
+const clientId = process.env.REACT_APP_CLIENT_ID;
 
 const getRefreshToken = async () => {
   const refreshToken = localStorage.getItem('refresh_token');
@@ -137,7 +137,6 @@ function App() {
   
 
   const getTotal = async()=>{
-    console.log('yes')
     await axios.post("http://localhost:1234/neet/back/totalPlaylists",{
       username: localStorage.getItem('user_id'),
       term: searchPlaylist,
